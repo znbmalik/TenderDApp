@@ -4,7 +4,7 @@ import { ca, cabi } from "../abi";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWallet } from "../WalletContext";
 
 const Navigation = () => {
@@ -18,6 +18,13 @@ const Navigation = () => {
       disconnectWallet();
     }
   }
+
+  useEffect(() => {
+    if (isWalletConnected) {
+      connectWallet();
+    }
+  }, []);
+
   console.log("isWalletConnected", isWalletConnected);
   console.log("account", ethAccounts);
   return (

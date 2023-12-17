@@ -3,40 +3,51 @@ import Web3 from "web3";
 import {ca,cabi} from "../../abi";
 import { useEffect, useState } from "react";
 import { Container, Row, Form, Col, Button, Card } from "react-bootstrap";
+import { useWallet } from "../../WalletContext";
+import { useContract } from "../../InitializeContract";
 
 const MintToken = () => {
 
   const [tokens, setTokens] = useState(""); 
   const [amount, setAmount] = useState("");
-  const [contract, setContract] = useState("");
   const [totalAvailable, setTotalAvailable] = useState("");
   const [headingText, setHeadingText] = useState('');
   const [pricePerToken, setPricePerToken] = useState("");
 
-  
+  const { isWalletConnected, connectWallet, ethAccounts } = useWallet();
+  console.log("Account in Mint",ethAccounts);
+
+  const {initializeContract,contract} = useContract();
+  console.log("contract in Mint",contract);
+
+  useEffect(() => {
+    if(isWalletConnected)
+      connectWallet();
+    initializeContract();
+  }, []);
 
   const SabzData=async () => {
     try{
-      console.log("Hello World");
-      if(Web3.givenProvider)//anything that will connect to web 3 e.g. metamsk
-         {
+      // console.log("Hello World");
+      // if(Web3.givenProvider)//anything that will connect to web 3 e.g. metamsk
+      //    {
             
-             await Web3.givenProvider.enable();//enable wallet (metamask )
-             let web3=new Web3(Web3.givenProvider);
-             let account=await web3.eth.getAccounts();
-             account=account[0];
-             console.log("EOA account :", account);
-             const contract_init=new web3.eth.Contract(cabi,ca);
-             setContract(contract_init);
-             console.log("contract :", contract_init);
-             console.log("Tokens:", tokens);
+            //  await Web3.givenProvider.enable();//enable wallet (metamask )
+            //  let web3=new Web3(Web3.givenProvider);
+            //  let account=await web3.eth.getAccounts();
+            //  account=account[0];
+            //  console.log("EOA account :", account);
+            //  const contract_init=new web3.eth.Contract(cabi,ca);
+            //  setContract(contract_init);
+            //  console.log("contract :", contract_init);
+            //  console.log("Tokens:", tokens);
 
-             const supp=await contract_init.methods.tSupply().call();
-             const min=await contract_init.methods.totalMint().call();
-             setTotalAvailable(supp-min);
-             console.log("available tokens",totalAvailable);
+            //  const supp=await contract_init.methods.tSupply().call();
+            //  const min=await contract_init.methods.totalMint().call();
+            //  setTotalAvailable(supp-min);
+            //  console.log("available tokens",totalAvailable);
            
-         }
+        // }
     }
     catch (err)
     {

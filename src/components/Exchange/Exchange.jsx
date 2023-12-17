@@ -1,16 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import { Card, Container, Row, Tab, Tabs } from "react-bootstrap";
 import BuyToken from "./BuyToken";
 import SellToken from "./SellToken";
 import MintToken from "./MintToken";
-import Nav from "react-bootstrap/Nav";
 import { useWallet } from "../../WalletContext";
+import { useContract } from "../../InitializeContract";
 
 const Exchange = () => {
   const [key, setKey] = useState("buy_token");
   const { isWalletConnected, connectWallet, ethAccounts } = useWallet();
-  console.log("wallet connected", isWalletConnected);
-  console.log("Account", ethAccounts);
+  console.log("Account in Exchange",ethAccounts);
+
+  const {initializeContract,contract} = useContract();
+  console.log("contract in Exchange",contract);
+
+  useEffect(() => {
+    if(isWalletConnected)
+      connectWallet();
+    initializeContract();
+  }, []);
 
   return (
     <div>
@@ -39,19 +47,7 @@ const Exchange = () => {
           </Card.Body>
         </Card>
       </Container>
-      <div>
-        {isWalletConnected ? (
-          <p>Connected</p>
-        ) : (
-          <Nav className="justify-content-end">
-            {/* <p>Please Connect Your Wallet</p> */}
-            <Nav.Link eventKey={2} href="#memes" onClick={connectWallet}>
-              Connect
-            </Nav.Link>
-          </Nav>
-        )}
-        {/* Your other components */}
-      </div>
+      
     </div>
   );
 };
