@@ -12,10 +12,12 @@ import BuyToken from "../components/Exchange/BuyToken";
 import SellToken from "../components/Exchange/SellToken";
 import MintToken from "../components/Exchange/MintToken";
 import { WalletProvider } from '../WalletContext';
+import { ContractProvider } from '../InitializeContract';
 
 const Router = () => {
   return (
     <WalletProvider>
+      <ContractProvider>
       
     <div>
       <Navigation />
@@ -34,7 +36,7 @@ const Router = () => {
         </Routes>
       </BrowserRouter>
     </div>
-    
+    </ContractProvider>
     </WalletProvider>
   );
 };

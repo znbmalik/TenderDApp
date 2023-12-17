@@ -2,58 +2,39 @@ import React from "react";
 import Web3 from "web3";
 import {ca,cabi} from "../abi";
 import { useEffect, useState } from "react";
+import { useContract } from "../InitializeContract";
 
 const Home = () => {
-  const [contract, setContract] = useState(null);
-
+  
+  const {initializeContract,contract} = useContract();
+  console.log(contract);
+ 
   const [totalSupply, setTotalSupply] = useState("");
   const [pricePerToken, setPricePerToken] = useState("");
   const [stakeHolders, setStakeHolders] = useState("");
   const [totalWorth, setTotalWorth] = useState("");
  
-  useEffect(() => {
-    const connectToContract = async () => { 
-      try {
-        // Check if Web3 is available
-        console.log("Web3 Instance:", window.web3);
-        if (window.ethereum) {
-          window.web3 = new Web3(window.ethereum);
-          await window.ethereum.enable();
-          console.log("if");
-        } else if (window.web3) {
-          window.web3 = new Web3(Web3.currentProvider);
-          console.log("else if");
-        } else {
-          console.log("Non-Ethereum browser detected. You should consider trying MetaMask!");
-          return;
-        }
+  // useEffect(() => {
+  //   const connectToContract = async () => {         
+  //       try {
 
-        // Replace 'yourContractAddress' with the actual address of your deployed contract
-        
-        try {
-          const contract = new window.web3.eth.Contract(cabi, ca);
-          setContract(contract);
-          const totalSupplyResult = await contract.methods.tSupply().call();
-          console.log(totalSupplyResult);
-          setTotalSupply(totalSupplyResult);
-          const pricePerTokenResult = await contract.methods.pricePerToken().call();
-          setPricePerToken(pricePerTokenResult);
-          setTotalWorth(totalSupplyResult*pricePerTokenResult);
-          setStakeHolders(await contract.methods.totalStakeHolders().call());
-          console.log(await contract.methods.totalStakeHolders().call());
+  //         const totalSupplyResult = await contract.methods.tSupply().call();
+  //         console.log(totalSupplyResult);
+  //         setTotalSupply(totalSupplyResult);
+  //         const pricePerTokenResult = await contract.methods.pricePerToken().call();
+  //         setPricePerToken(pricePerTokenResult);
+  //         setTotalWorth(totalSupplyResult*pricePerTokenResult);
+  //         setStakeHolders(await contract.methods.totalStakeHolders().call());
+  //         console.log(await contract.methods.totalStakeHolders().call());
 
-        } catch (error) {
-          console.error("Error creating contract instance:", error);
-        }
+  //       } catch (error) {
+  //         console.error("Error creating contract instance:", error);
+  //       }
 
-      } catch (error) {
-        console.error("Error connecting to the contract:", error);
-      }
-    };
+  //   };
 
-    connectToContract();
-  }, []); // Empty dependency array ensures this effect runs only once on component mount
-
+  //   connectToContract();
+  // }, []); 
      
   
 
