@@ -8,12 +8,11 @@ import { useContract } from "../../InitializeContract";
 
 const MintToken = () => {
 
-  const [tokens, setTokens] = useState(""); 
+  const [requiredTokens, setRequiredTokens] = useState("");
   const [amount, setAmount] = useState("");
   const [totalAvailable, setTotalAvailable] = useState("");
-  const [headingText, setHeadingText] = useState('');
-  const [pricePerToken, setPricePerToken] = useState("");
-
+  const [errorText, setErrorText] = useState(false);
+  
   const { isWalletConnected, connectWallet, ethAccounts } = useWallet();
   console.log("Account in Mint",ethAccounts);
 
@@ -28,26 +27,27 @@ const MintToken = () => {
 
   const SabzData=async () => {
     try{
-      // console.log("Hello World");
-      // if(Web3.givenProvider)//anything that will connect to web 3 e.g. metamsk
-      //    {
-            
-            //  await Web3.givenProvider.enable();//enable wallet (metamask )
-            //  let web3=new Web3(Web3.givenProvider);
-            //  let account=await web3.eth.getAccounts();
-            //  account=account[0];
-            //  console.log("EOA account :", account);
-            //  const contract_init=new web3.eth.Contract(cabi,ca);
-            //  setContract(contract_init);
-            //  console.log("contract :", contract_init);
-            //  console.log("Tokens:", tokens);
+     
+          const supp=await contract.methods.tSupply().call();
+          const min=await contract.methods.totalMint().call();
+          setTotalAvailable(supp-min);
+          console.log("available tokens",totalAvailable);       
+    }
+    catch (err)
+    {
+       console.log(err);
+    }
 
-            //  const supp=await contract_init.methods.tSupply().call();
-            //  const min=await contract_init.methods.totalMint().call();
-            //  setTotalAvailable(supp-min);
-            //  console.log("available tokens",totalAvailable);
-           
-        // }
+ }
+
+  const computePrice=async (tokens) => {
+    try{
+     
+          const pricePerTkn=await contract.methods.pricePerToken().call();
+          //const min=await contract.methods.totalMint().call();
+          setAmount(pricePerTkn*tokens);
+          //console.log("available tokens",totalAvailable);    
+          setRequiredTokens(tokens);
     }
     catch (err)
     {
@@ -65,27 +65,22 @@ const MintToken = () => {
 const SabzMint=async () => {
   try{
     console.log("Hello World");
-    if(Web3.givenProvider)//anything that will connect to web 3 e.g. metamsk
-       {
-          
-           await Web3.givenProvider.enable();//enable wallet (metamask )
-           let web3=new Web3(Web3.givenProvider);
-           let account=await web3.eth.getAccounts();
-           account=account[0];
-           console.log("EOA account :", account);
-           //const contract_init=new web3.eth.Contract(cabi,ca);
-           //setContract(contract_init);
-           console.log("contract :", contract);
-           console.log("Tokens:", tokens);
-           const pricePerTokenResult = await contract.methods.pricePerToken().call();
-           setPricePerToken(pricePerTokenResult);
-
-           setAmount(tokens*pricePerToken);
-           
-           //const min=await contract.methods.totalMint().call();
-           
-         
-       }
+    
+    const web3 = new Web3(window.ethereum);   
+    //const balanceInWei = 5;
+    const balanceInWei = await web3.eth.getBalance(ethAccounts[0]);
+    if(balanceInWei<amount)
+    {
+        setErrorText(true);
+    }
+    else
+    {
+        const result = await contract.methods.tokenMint(requiredTokens).send({
+        from: ethAccounts[0],
+        value: web3.utils.toWei(amount, 'ether'), // Send some ether along with the transaction if the function is payable
+      });
+      SabzData();
+    }        
   }
   catch (err)
   {
@@ -99,7 +94,10 @@ const SabzMint=async () => {
       <Container className="my-5">
         <Card>
           <Card.Header>
-            <h3>Mint Token {totalAvailable}</h3>
+          <Card.Header className="d-flex justify-content-between">
+            <h3>Mint Token</h3>
+            <h3> Total Available: {totalAvailable}</h3>
+          </Card.Header>
           </Card.Header>
           <Card.Body>
             <Form>
@@ -112,9 +110,9 @@ const SabzMint=async () => {
                   Token
                 </Form.Label>
                 <Col sm="10">
-                  <Form.Control type="number" placeholder="Tokens" min="1" value={tokens}
+                  <Form.Control type="number" placeholder="Tokens" min="1"  max={totalAvailable}
                     onChange={(e) => {
-                      setTokens(e.target.value);
+                      computePrice(e.target.value);
 
                     }}/>
                 </Col>
@@ -129,20 +127,11 @@ const SabzMint=async () => {
                   Price
                 </Form.Label>
                 <Col sm="10">
-                  <Form.Control type="text" placeholder="Price" readOnly />
+                  <Form.Control type="text" placeholder="Price" readOnly value={amount} />
                 </Col>
               </Form.Group>
-
-
-
-              {/* <Form.Group as={Row} className="mb-3" controlId="description">
-                <Form.Label column sm="2">
-                  Description
-                </Form.Label>
-                <Col sm="10">
-                  <Form.Control type="text" placeholder="Description" />
-                </Col>
-              </Form.Group> */}
+              {errorText &&<small className="text-danger"> * Sorry! You have insufficient balance</small>}
+              <br />
               <Button className="mt-4" onClick={SabzMint}>Mint Token</Button>
             </Form>
           </Card.Body>
